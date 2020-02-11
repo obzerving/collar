@@ -522,15 +522,12 @@ def makeTab(pt1, pt2, orient):
             rtp1y = rtp1[0][1].imag
             rtp2x = rtp2[0][1].real
             rtp2y = rtp2[0][1].imag
-      print('Testing: '+str(ppt1.real)+','+str(ppt1.imag)+' '+str(rtp1x)+','+str(rtp1y)+' '+str(rtp2x)+','+str(rtp2y)+' '+str(ppt2.real)+','+str(ppt2.imag))
       if detectIntersect(ppt1.real, ppt1.imag, rtp1x, rtp1y, ppt2.real, ppt2.imag, rtp2x, rtp2y):
-         print('Intersect: '+str(currTabAngle)+' degrees, '+str(currTabHt)+' inches, orientation '+str(orient))
          currTabAngle = currTabAngle - 1.0
          if currTabAngle < 2.0:
             currTabHt = currTabHt - 0.1
             currTabAngle = tab_angle
       else:
-         print('No Intersect: '+str(currTabAngle)+' degrees, '+str(currTabHt)+' inches, orientation '+str(orient))
          tabDone = True
    p1 = complex(rtp1x,rtp1y)
    p2 = complex(rtp2x,rtp2y)
