@@ -27,6 +27,7 @@ import tkinter.filedialog
 import tkinter.font as font
 from tkinter import messagebox
 from copy import deepcopy
+import pathlib
 
 # user defined defaults
 outputfile = ''
@@ -38,6 +39,7 @@ tabht = .25
 shght = 2.0
 
 # program defined defaults
+units = [1,1,25.4]
 tabangle = 25
 vlen = 0.0
 orientTop = 0
@@ -69,6 +71,8 @@ def main(argv):
    global shght
    global tabangle
    global vlen
+   global unitsd
+   global units
    tab_height = tabht
    tab_angle = tabangle
    numnodes = 8
@@ -91,6 +95,11 @@ def main(argv):
    L2.pack( side = tkinter.LEFT)
    E2 = tkinter.Entry(F2, bd =5, width=30)
    E2.pack(side = tkinter.LEFT)
+   F2a = Frame(pane)
+   L2a = tkinter.Label(F2a, text="Units of Dimensions")
+   L2a.pack( side = tkinter.LEFT)
+   unitnames = ['','in','mm']
+   unitsd = IntVar() # 1 = inches, 2 = mm
    F3 = Frame(pane)
    L3 = tkinter.Label(F3, text="Number of Polygon Sides")
    L3.pack( side = tkinter.LEFT)
@@ -98,31 +107,31 @@ def main(argv):
    E3.insert(0,str(n))
    E3.pack(side = tkinter.LEFT)
    F4 = Frame(pane)
-   L4 = tkinter.Label(F4, text="Length of Dashline in inches (zero for solid line)")
+   L4 = tkinter.Label(F4, text="Length of Dashline in selected units (zero for solid line)")
    L4.pack( side = tkinter.LEFT)
    E4 = tkinter.Entry(F4, bd =5, width=6)
    E4.insert(0,str(dashlength))
    E4.pack(side = tkinter.LEFT)
    F4a = Frame(pane)
-   L4a = tkinter.Label(F4a, text="Height of Tab in inches")
+   L4a = tkinter.Label(F4a, text="Height of Tab in selected units")
    L4a.pack( side = tkinter.LEFT)
    E4a = tkinter.Entry(F4a, bd =5, width=6)
    E4a.insert(0,str(tabht))
    E4a.pack(side = tkinter.LEFT)
    F5a = Frame(pane)
-   L5a = tkinter.Label(F5a, text="Size of Smaller Polygon in inches)")
+   L5a = tkinter.Label(F5a, text="Size of Smaller Polygon in selected units)")
    L5a.pack( side = tkinter.LEFT)
    E5a = tkinter.Entry(F5a, bd =5, width=5)
    E5a.insert(0,str(plgn2a))
    E5a.pack(side = tkinter.LEFT)
    F5b = Frame(pane)
-   L5b = tkinter.Label(F5b, text="Size of Larger Polygon in inches)")
+   L5b = tkinter.Label(F5b, text="Size of Larger Polygon in selected units)")
    L5b.pack( side = tkinter.LEFT)
    E5b = tkinter.Entry(F5b, bd =5, width=5)
    E5b.insert(0,str(plgn1a))
    E5b.pack(side = tkinter.LEFT)
    F7 = Frame(pane)
-   L7 = tkinter.Label(F7, text="Height of Collar in inches)")
+   L7 = tkinter.Label(F7, text="Height of Collar in selected units)")
    L7.pack( side = tkinter.LEFT)
    E7 = tkinter.Entry(F7, bd =5, width=5)
    E7.insert(0,str(shght))
@@ -130,9 +139,44 @@ def main(argv):
    def OutfileCallBack():
       ftypes = [('svg files','.svg'), ('All files','*')]
       outputfile = tkinter.filedialog.asksaveasfilename(title = "Save File As", filetypes = ftypes, defaultextension='.svg')
+      E2.delete(0,tkinter.END)
       E2.insert(0,outputfile)
+   def RBCallBack():
+      global dashlength
+      global plgn1a
+      global plgn2a
+      global tabht
+      global shght
+      global unitsd
+      global units
+      print(units)
+      if unitsd != units[0]:
+         oldunits = units[units[0]]
+         dashlength = float(E4.get())/oldunits
+         tabht = float(E4a.get())/oldunits
+         plgn1a = float(E5b.get())/oldunits
+         plgn2a = float(E5a.get())/oldunits
+         shght = float(E7.get())/oldunits
+         newunits = units[unitsd.get()]
+         dashlength = dashlength*newunits
+         tabht = tabht*newunits
+         plgn1a = plgn1a*newunits
+         plgn2a = plgn2a*newunits
+         shght = shght*newunits
+         E4.delete(0,tkinter.END)
+         E4.insert(0,str(dashlength))
+         E4a.delete(0,tkinter.END)
+         E4a.insert(0,str(tabht))
+         E5b.delete(0,tkinter.END)
+         E5b.insert(0,str(plgn1a))
+         E5a.delete(0,tkinter.END)
+         E5a.insert(0,str(plgn2a))
+         E7.delete(0,tkinter.END)
+         E7.insert(0,str(shght))
+         units[0] = unitsd.get()
    def CancelCallBack():
       top.destroy()
+      sys.exit(0)
    def OKCallBack():
       global outputfile
       global n
@@ -151,6 +195,11 @@ def main(argv):
       top.destroy()
    B2 = tkinter.Button(F2, text="Browse", command=OutfileCallBack)
    B2.pack(side = tkinter.LEFT)
+   R2a1 = Radiobutton(F2a, text='inches', variable=unitsd, value=1,command=RBCallBack)
+   R2a1.pack(side = tkinter.LEFT)
+   R2a2 = Radiobutton(F2a, text='mm', variable=unitsd, value=2,command=RBCallBack)
+   R2a2.pack(side = tkinter.LEFT)
+   R2a1.select()
    F6 = Frame(pane)
    bfont = font.Font(size=12)
    B3 = tkinter.Button(F6, text="Cancel", command=CancelCallBack)
@@ -160,6 +209,7 @@ def main(argv):
    B4['font'] = bfont
    B4.pack(side = tkinter.RIGHT,ipadx=40)
    pane.add(F2)
+   pane.add(F2a)
    pane.add(F3)
    pane.add(F4)
    pane.add(F4a)
@@ -173,7 +223,19 @@ def main(argv):
       root.withdraw()
       messagebox.showerror("Collar Input Error", "Output File is Required")
       sys.exit(5)
+   else:
+      fpl = pathlib.Path(outputfile)
+      if not fpl.is_absolute():
+         if fpl.suffix == '':
+            fpl = fpl.with_suffix('.svg')
+         fpl = pathlib.Path.cwd().joinpath(fpl)
+         outputfile = os.fspath(fpl)
    # Determine largest (plgn1) and smallest (plgn2) polygon
+   if units[0] != 1:
+      # adjust some non-user parameters
+      battributes['style'] = battributes['style'].replace('stroke-width:0.96','stroke-width:24.384')
+      wattributes['style'] = wattributes['style'].replace('stroke-width:0.96','stroke-width:24.384')
+      sattributes['style'] = sattributes['style'].replace('stroke-width:0.96','stroke-width:24.384')
    plgn1 = max(plgn1a, plgn2a)
    plgn2 = min(plgn1a, plgn2a)
    wrapscale = 1.005 # wrapper is scaled up 0.5% to better cover the model
@@ -353,12 +415,12 @@ def main(argv):
    for tps in opaths:
       totalpaths.append(tps)
    xmin,xmax,ymin,ymax=totalpaths.bbox()
-   tmpfile = str(uuid.uuid4())
+   tmpfile = os.path.join(os.getcwd(),str(uuid.uuid4()))
    wsvg(opaths, filename=tmpfile, attributes=oattributes)
    # Post processing stage
    # Due to issues with svgpathtools, some post processing of the file output from the library is necessary until issues have been resolved
    # The following attributes are suitable for input to inkscape and/or the Cricut Design Space
-   # Document properties are 11.5 x 11.5 inches. The viewBox sets the scale at 72 dpi. Change the display units in Inkscape to inches.
+   # Document properties are the equivalent of 11.5 x 11.5 inches. The viewBox sets the scale at 72 dpi. Change the display units in Inkscape if necessary.
    docscale = 72
    isvg_attributes = {'xmlns:dc': 'http://purl.org/dc/elements/1.1/', 'xmlns:cc': 'http://creativecommons.org/ns#', 'xmlns:rdf': 'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'xmlns:svg': 'http://www.w3.org/2000/svg', 'xmlns': 'http://www.w3.org/2000/svg', 'id': 'svg8', 'version': '1.1', 'viewBox': '0 0 828.0 828.0', 'height': '11.5in', 'width': '11.5in'}
    # Assumes order of paths is body, scorelines, big polygon, small polygon, wrapper
@@ -368,6 +430,16 @@ def main(argv):
    # Accessing the svg node (which must be the root element)
    svg =DOMTree.documentElement
    # correct the height, width, and viewBox attributes
+   if units[0] != 1:
+      # Change some parameters
+      inheight = float(isvg_attributes['height'][:-2])*units[units[0]]
+      inwidth = float(isvg_attributes['width'][:-2])*units[units[0]]
+      invb = isvg_attributes['viewBox'].split()
+      invb[2] = str(round(float(invb[2])*units[units[0]]))
+      invb[3] = str(round(float(invb[3])*units[units[0]]))
+      isvg_attributes['height'] = str(inheight)+unitnames[units[0]]
+      isvg_attributes['width'] = str(inwidth)+unitnames[units[0]]
+      isvg_attributes['viewBox'] = ' '.join(invb)
    svg.setAttribute('height', isvg_attributes['height'])
    svg.setAttribute('width', isvg_attributes['width'])
    svg.setAttribute('viewBox', isvg_attributes['viewBox'])
@@ -540,7 +612,7 @@ def detectIntersect(x1, y1, x2, y2, x3, y3, x4, y4):
    td = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4)
    if td == 0:
       # These line segments are parallel
-      return False
+      return false
    t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/td
    if (0.0 <= t) and (t <= 1.0):
       return True
@@ -549,7 +621,7 @@ def detectIntersect(x1, y1, x2, y2, x3, y3, x4, y4):
 
 def makescore(ipt1, ipt2, dashlength):
    # Need pt1y > pt2y
-   # Dash = dashlength (in inches) space followed by dashlength mark
+   # Dash = dashlength space followed by dashlength mark
    # if dashlength is zero, we want a solid line
    if ipt1.y < ipt2.y:
       pt1 = ipt2
